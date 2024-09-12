@@ -1,6 +1,8 @@
 # Configuration for gitpod.io
 # To run on gitpod open https://gitpod.io/?autostart=false# followed by the github URL of your project
 # e.g. https://gitpod.io/?autostart=false#https://github.com/hedera-dev/hedera-tutorial-demo-base-template
+image:
+    file: .gitpod.Dockerfile
 tasks:
   - name: 'get_deps'
     init: |
