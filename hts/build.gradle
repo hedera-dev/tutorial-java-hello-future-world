@@ -3,7 +3,7 @@ plugins {
 }
 
 application {
-    mainClass = '____.Script____'
+    mainClass = 'hts.ScriptHtsFt'
 }
 
 repositories {
