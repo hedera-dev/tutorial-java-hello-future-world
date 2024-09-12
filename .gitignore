@@ -1,2 +1,4 @@
+/.env
 .gradle/
 build/
+bin/
