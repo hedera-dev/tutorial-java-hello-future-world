@@ -1,4 +1,4 @@
-package ____;
+package hcs;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -9,9 +9,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 
-public class Script____ {
+public class ScriptHcsTopic {
     public static void main(String[] args) throws Exception {
-        System.out.println("🏁 Hello Future World - ____ - start");
+        System.out.println("🏁 Hello Future World - HCS Topic - start");
 
 	    // Load environment variables from .env file
         Dotenv dotenv = Dotenv.configure().directory("../").load();
@@ -67,6 +67,6 @@ public class Script____ {
         // long tokenTotalSupply = jsonResponse.get("total_supply").getAsLong();
         // System.out.println("The total supply of this token: " + Long.toString(tokenTotalSupply));
 
-        System.out.println("🎉 Hello Future World - ____ - complete");
+        System.out.println("🎉 Hello Future World - HCS Topic - complete");
     }
 }
