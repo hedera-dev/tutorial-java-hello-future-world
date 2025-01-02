@@ -29,6 +29,18 @@ const config = {
       },
     },
     {
+      files: ['*.java'],
+      options: {
+        tabWidth: 4,
+      },
+    },
+    {
+      files: ['*.go'],
+      options: {
+        useTabs: true,
+      },
+    },
+    {
       files: ['*.yml', '*.yaml'],
       options: {
         tabWidth: 2,
