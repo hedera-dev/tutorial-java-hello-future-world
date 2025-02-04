@@ -22,8 +22,8 @@ public class ScriptTransferHbar {
     public static void main(String[] args) throws Exception {
         System.out.println("🏁 Hello Future World - Transfer HBAR - start");
 
-	    // Load environment variables from .env file
-        Dotenv dotenv = Dotenv.configure().directory("../").load();
+        // Load environment variables from .env file
+        Dotenv dotenv = Dotenv.configure().directory("./").load();
         String operatorIdStr = dotenv.get("OPERATOR_ACCOUNT_ID");
         String operatorKeyStr = dotenv.get("OPERATOR_ACCOUNT_PRIVATE_KEY");
         if (operatorIdStr == null || operatorKeyStr == null) {
@@ -33,37 +33,39 @@ public class ScriptTransferHbar {
             operatorKeyStr = operatorKeyStr.substring(2);
         }
 
-	    // Initialize the operator account
+        // Initialize the operator account
         AccountId operatorId = AccountId.fromString(operatorIdStr);
         PrivateKey operatorKey = PrivateKey.fromStringECDSA(operatorKeyStr);
         Client client = Client.forTestnet().setOperator(operatorId, operatorKey);
         System.out.println("Using account: " + operatorIdStr);
 
-        //Set the default maximum transaction fee (in HBAR)
+        // Set the default maximum transaction fee (in HBAR)
         client.setDefaultMaxTransactionFee(new Hbar(100));
-        //Set the default maximum payment for queries (in HBAR)
+        // Set the default maximum payment for queries (in HBAR)
         client.setDefaultMaxQueryPayment(new Hbar(50));
 
         System.out.println("🟣 Creating, signing, and submitting the transfer transaction");
         AccountId recipientAccount1 = AccountId.fromString("0.0.200");
         AccountId recipientAccount2 = AccountId.fromString("0.0.201");
         TransferTransaction transferTx = new TransferTransaction()
-		    .setTransactionMemo("Hello Future World transfer - xyz")
-            // Debit  3 HBAR from the operator account (sender)
-            .addHbarTransfer(operatorId, Hbar.from(-3, HbarUnit.HBAR))
-            // Credit 1 HBAR to account 0.0.200 (1st recipient)
-            .addHbarTransfer(recipientAccount1, Hbar.from(1, HbarUnit.HBAR))
-            // Credit 2 HBAR to account 0.0.201 (2nd recipient)
-            .addHbarTransfer(recipientAccount2, Hbar.from(2, HbarUnit.HBAR))
-            // Freeze the transaction to prepare for signing
-            .freezeWith(client);
+                .setTransactionMemo("Hello Future World transfer - xyz")
+                // Debit 3 HBAR from the operator account (sender)
+                .addHbarTransfer(operatorId, Hbar.from(-3, HbarUnit.HBAR))
+                // Credit 1 HBAR to account 0.0.200 (1st recipient)
+                .addHbarTransfer(recipientAccount1, Hbar.from(1, HbarUnit.HBAR))
+                // Credit 2 HBAR to account 0.0.201 (2nd recipient)
+                .addHbarTransfer(recipientAccount2, Hbar.from(2, HbarUnit.HBAR))
+                // Freeze the transaction to prepare for signing
+                .freezeWith(client);
 
         // Get the transaction ID for the transfer transaction
         TransactionId transferTxId = transferTx.getTransactionId();
         System.out.println("The transfer transaction ID: " + transferTxId.toString());
 
-        // Sign the transaction with the account that is being debited (operator account) and the transaction fee payer account (operator account)
-        // Since the account that is being debited and the account that is paying for the transaction are the same, only one account's signature is required
+        // Sign the transaction with the account that is being debited (operator
+        // account) and the transaction fee payer account (operator account)
+        // Since the account that is being debited and the account that is paying for
+        // the transaction are the same, only one account's signature is required
         TransferTransaction transferTxSigned = transferTx.sign(operatorKey);
 
         // Submit the transaction to the Hedera Testnet
@@ -72,42 +74,42 @@ public class ScriptTransferHbar {
         // Get the transfer transaction receipt
         TransactionReceipt transferTxReceipt = transferTxSubmitted.getReceipt(client);
         Status transactionStatus = transferTxReceipt.status;
-        System.out.println(
-            "The transfer transaction status is: " +
-            transactionStatus.toString()
-        );
+
+        // Check if the transaction was successful
+        if (transactionStatus == Status.SUCCESS) {
+            System.out.println("✅ The transfer transaction was successful.");
+            System.out.println("Transaction Hashscan URL:\nhttps://hashscan.io/testnet/transaction/" + transferTxId);
+        } else {
+            System.err.println("❌ The transfer transaction failed with status: " + transactionStatus);
+            throw new RuntimeException("Transaction failed: " + transactionStatus);
+        }
 
         // Query HBAR balance using AccountBalanceQuery
         AccountBalance newAccountBalance = new AccountBalanceQuery()
-            .setAccountId(operatorId)
-            .execute(client);
+                .setAccountId(operatorId)
+                .execute(client);
         Hbar newHbarBalance = newAccountBalance.hbars;
         System.out.println(
-            "The new account balance after the transfer: " +
-            newHbarBalance.toString()
-        );
+                "The new account balance after the transfer: " +
+                        newHbarBalance.toString());
 
         client.close();
 
         // View the transaction in HashScan
         System.out.println(
-          "🟣 View the transfer transaction transaction in HashScan"
-        );
-        String transferTxVerifyHashscanUrl =
-            "https://hashscan.io/testnet/transaction/" + transferTxId;
+                "🟣 View the transfer transaction transaction in HashScan");
+        String transferTxVerifyHashscanUrl = "https://hashscan.io/testnet/transaction/" + transferTxId;
         System.out.println(
-          "Transaction Hashscan URL:\n" +
-          transferTxVerifyHashscanUrl
-        );
+                "Transaction Hashscan URL:\n" +
+                        transferTxVerifyHashscanUrl);
 
         // Verify transfer transaction using Mirror Node API
         System.out.println("🟣 Get transfer transaction data from the Hedera Mirror Node");
         Thread.sleep(6_000);
 
-        String transferTxIdMirrorNodeFormat =
-          convertTransactionIdForMirrorNodeApi(transferTxId.toString());
-        String transferTxVerifyMirrorNodeApiUrl =
-            "https://testnet.mirrornode.hedera.com/api/v1/transactions/" + transferTxIdMirrorNodeFormat + "?nonce=0";
+        String transferTxIdMirrorNodeFormat = convertTransactionIdForMirrorNodeApi(transferTxId.toString());
+        String transferTxVerifyMirrorNodeApiUrl = "https://testnet.mirrornode.hedera.com/api/v1/transactions/"
+                + transferTxIdMirrorNodeFormat + "?nonce=0";
 
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(transferTxVerifyMirrorNodeApiUrl))
@@ -131,8 +133,7 @@ public class ScriptTransferHbar {
             }
         }
         filteredAndSortedTransfers.sort(
-            Comparator.comparingLong(obj -> obj.get("amount").getAsLong())
-        );
+                Comparator.comparingLong(obj -> obj.get("amount").getAsLong()));
 
         System.out.printf("%-15s %-15s%n", "AccountID", "Amount");
         System.out.println("-".repeat(30));
