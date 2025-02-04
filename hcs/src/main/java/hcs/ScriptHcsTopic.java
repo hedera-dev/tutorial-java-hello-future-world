@@ -23,7 +23,7 @@ public class ScriptHcsTopic {
         System.out.println("🏁 Hello Future World - HCS Topic - start");
 
         // Load environment variables from .env file
-        Dotenv dotenv = Dotenv.configure().directory("./").load();
+        Dotenv dotenv = Dotenv.configure().directory("../").load();
         String operatorIdStr = dotenv.get("OPERATOR_ACCOUNT_ID");
         String operatorKeyStr = dotenv.get("OPERATOR_ACCOUNT_PRIVATE_KEY");
         if (operatorIdStr == null || operatorKeyStr == null) {
